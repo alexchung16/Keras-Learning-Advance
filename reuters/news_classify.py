@@ -145,10 +145,11 @@ if __name__ == "__main__":
     predict_prob = trained_model.predict(x_test)
     predict_label = np.zeros((predict_prob.shape[0],))
     for i, probs in enumerate(predict_prob):
-        probs_hashmap = {}
-        for j, prob in enumerate(probs):
-            probs_hashmap[prob] = j
-        predict_label[i] = probs_hashmap[max(probs)]
+        predict_label[i] = np.argmax(probs)
+        # probs_hashmap = {}
+        # for j, prob in enumerate(probs):
+        #     probs_hashmap[prob] = j
+        # predict_label[i] = probs_hashmap[max(probs)]
     print(predict_label)
 
     # plot train validation loss and accuracy

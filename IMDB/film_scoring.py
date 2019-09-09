@@ -31,7 +31,7 @@ def vectorizeSequences(sequences, dimension=10000):
     :param dimension: 单词维度
     :return:
     """
-    one_hot_results = np.zeros((len(sequences), dimension))
+    one_hot_results = np.zeros(shape=(len(sequences), dimension))
     for i, sequence in enumerate(sequences):
         one_hot_results[i, sequence] = 1.
     return one_hot_results
@@ -118,35 +118,34 @@ if __name__ == "__main__":
                   metrics=[metrics.binary_accuracy])
 
     # training model
-    # history = model.fit(x=x_training, y=y_training, epochs=20, batch_size=512, validation_data=(x_validation, y_validation))
+    history = model.fit(x=x_training, y=y_training, epochs=20, batch_size=512,
+                        validation_data=(x_validation, y_validation))
 
-    # # plot train validation loss and accuracy
-    # plotTrainValidationLossAccuracy(history)
+
 
 
     model_path = os.getcwd() + '\\model\\imdb.h5'
     # save model
-    # saveModel(model, model_path)
+    saveModel(model, model_path)
 
     # load model
-    pre_model = load_model(model_path)
+    trained_model = load_model(model_path)
 
     # 评估测试集
-    evaluate_result = pre_model.evaluate(x_test, y_test)
+    evaluate_result = trained_model.evaluate(x_test, y_test)
     print(evaluate_result)
 
     # 预测数据
-    predict_prob = pre_model.predict(x_test)
-    predict_label = np.zeros(predict_prob.shape)
+    predict_prob = trained_model.predict(x_test)
+    predict_label = np.zeros((predict_prob.shape,))
 
     for i, prop in enumerate(predict_prob):
         if prop < 0.5:
             predict_label[i] = 0
         else:
             predict_label[i] = 1
-
-    print(y_test)
     print(predict_label)
 
-
+    # plot train validation loss and accuracy
+    plotTrainValidationLossAccuracy(history)
 

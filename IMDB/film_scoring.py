@@ -57,14 +57,14 @@ def plotTrainValidationLossAccuracy(history):
     ax1.set_title('Training and validation loss')
     ax1.set_xlabel('Epochs')
     ax1.set_ylabel('Loss')
-    plt.legend()
+    ax1.legend()
 
     ax2.plot(epochs, binary_accuracy, 'bo', label='Training accuracy')
     ax2.plot(epochs, val_binary_accuracy, 'b', label='Validation accuracy')
     ax2.set_title('Training and validation accuracy')
     ax2.set_xlabel('Epochs')
     ax2.set_ylabel('Accuracy')
-    plt.legend()
+    ax2.legend()
     plt.show()
 
 

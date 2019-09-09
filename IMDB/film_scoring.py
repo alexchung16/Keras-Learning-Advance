@@ -131,10 +131,22 @@ if __name__ == "__main__":
     # load model
     pre_model = load_model(model_path)
 
-    # # 评估测试集
+    # 评估测试集
     evaluate_result = pre_model.evaluate(x_test, y_test)
     print(evaluate_result)
 
+    # 预测数据
+    predict_prob = pre_model.predict(x_test)
+    predict_label = np.zeros(predict_prob.shape)
+
+    for i, prop in enumerate(predict_prob):
+        if prop < 0.5:
+            predict_label[i] = 0
+        else:
+            predict_label[i] = 1
+
+    print(y_test)
+    print(predict_label)
 
 
 

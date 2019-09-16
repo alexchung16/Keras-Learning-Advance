@@ -121,6 +121,8 @@ if __name__ == "__main__":
     history = model.fit(x=x_training, y=y_training, epochs=20, batch_size=512,
                         validation_data=(x_validation, y_validation))
 
+    # plot train validation loss and accuracy
+    plotTrainValidationLossAccuracy(history)
 
     model_path = os.getcwd() + '\\model\\imdb.h5'
     # save model
@@ -135,7 +137,7 @@ if __name__ == "__main__":
 
     # 预测数据
     predict_prob = trained_model.predict(x_test)
-    predict_label = np.zeros(predict_prob.shape,)
+    predict_label = np.zeros((predict_prob.shape,))
 
     for i, prop in enumerate(predict_prob):
         if prop < 0.5:

@@ -122,8 +122,6 @@ if __name__ == "__main__":
                         validation_data=(x_validation, y_validation))
 
 
-
-
     model_path = os.getcwd() + '\\model\\imdb.h5'
     # save model
     saveModel(model, model_path)
@@ -137,7 +135,7 @@ if __name__ == "__main__":
 
     # 预测数据
     predict_prob = trained_model.predict(x_test)
-    predict_label = np.zeros((predict_prob.shape,))
+    predict_label = np.zeros(predict_prob.shape,)
 
     for i, prop in enumerate(predict_prob):
         if prop < 0.5:

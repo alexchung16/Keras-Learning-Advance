@@ -130,6 +130,9 @@ if __name__ == "__main__":
     history = model.fit(x=x_training, y=y_training, epochs=20, batch_size=512,
                         validation_data=(x_validation, y_validation))
 
+    # plot train validation loss and accuracy
+    plotTrainValidationLossAccuracy(history)
+
     model_path = os.getcwd() + '\\model\\reuters.h5'
     # save model
     saveModel(model, model_path)
@@ -152,8 +155,7 @@ if __name__ == "__main__":
         # predict_label[i] = probs_hashmap[max(probs)]
     print(predict_label)
 
-    # plot train validation loss and accuracy
-    plotTrainValidationLossAccuracy(history)
+
 
 
 

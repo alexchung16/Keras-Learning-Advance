@@ -14,7 +14,6 @@ from keras import models, layers
 from keras import optimizers, losses, metrics
 from keras.models import load_model
 
-
 # tensorboard path
 tb_path = os.getcwd() + r'/logs'
 

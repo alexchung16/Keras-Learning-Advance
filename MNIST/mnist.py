@@ -32,15 +32,23 @@ def MNIST():
     """
     model = models.Sequential()
     # CNN
+    # input shape (28, 28, 1) output shape(26, 26, 1)
     model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)))
+    # input shape (26, 26, 32) output shape(13, 13, 32)
     model.add(layers.MaxPool2D(2, 2))
-    model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+    # input shape (13, 13, 32) output shape(11, 11, 64)
+    model.add(layers.Conv2D(64, (3, 3), activation='relu', input_shape=(13, 13, 32)))
+    # input shape (11, 11, 64) output shape(5, 5, 64)
     model.add(layers.MaxPool2D(2, 2))
-    model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+    # input shape (5, 5, 64) output shape(3, 3, 64)
+    model.add(layers.Conv2D(64, (3, 3), activation='relu', input_shape=(5, 5, 64)))
     # 3D 平展为1D
+    # input shape (3, 3, 64) output shape(3*3*64=576, )
     model.add(layers.Flatten())
     # FCN 分类
+    # input shape (576, ) output shape(64, )
     model.add(layers.Dense(64, activation='relu'))
+    # input shape (64, ) output shape(10, )
     model.add(layers.Dense(10, activation='softmax'))
 
     return model
@@ -81,6 +89,7 @@ if __name__ == "__main__":
     tb_cb = keras.callbacks.TensorBoard(log_dir=tb_path, histogram_freq=1, write_images=1)
 
     model = MNIST()
+    # print(model.summary())
     (train_images, train_labels), (test_images, test_labels) = loadMNISTData()
 
     # transform data

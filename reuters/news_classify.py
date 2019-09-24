@@ -8,10 +8,15 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import keras
 from keras.datasets import reuters
 from keras import models, layers
 from keras import optimizers, losses, metrics
 from keras.models import load_model
+
+
+# tensorboard path
+tb_path = os.getcwd() + r'/logs'
 
 
 def loadReutersData(num_words=10000):
@@ -99,6 +104,8 @@ def saveModel(model, model_path):
 
 
 if __name__ == "__main__":
+
+    tb_cb = keras.callbacks.TensorBoard(log_dir=tb_path, histogram_freq=1, write_images=1)
     (train_data, train_labels), (test_data, test_labels) = loadReutersData()
     # one-hot 向量化单词序列
     x_train = vectorizeSequences(train_data)
@@ -127,13 +134,20 @@ if __name__ == "__main__":
                   )
 
     # train model
-    history = model.fit(x=x_training, y=y_training, epochs=20, batch_size=512,
+    history = model.fit(x=x_training, y=y_training, epochs=20, batch_size=512, callbacks=[tb_cb],
                         validation_data=(x_validation, y_validation))
 
     # plot train validation loss and accuracy
     plotTrainValidationLossAccuracy(history)
 
-    model_path = os.getcwd() + '\\model\\reuters.h5'
+    # 创建模型保存路径
+    model_path = os.getcwd() + r'/model'
+    if os.path.exists(model_path):
+        print(model_path, 'is exist')
+    else:
+        os.mkdir(model_path)
+        print(model_path, 'has been successfully created')
+    model_path = model_path + '/reuters.h5'
     # save model
     saveModel(model, model_path)
 

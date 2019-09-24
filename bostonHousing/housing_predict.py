@@ -14,6 +14,8 @@ from keras import models, layers
 from keras import optimizers, losses, metrics
 from keras.models import load_model
 
+# tensorboard path
+tb_path = os.getcwd()
 
 def loadHousingData():
     """
@@ -61,7 +63,7 @@ if __name__ == "__main__":
     model = buildMode()
 
     k = 5
-    num_epochs = 5
+    num_epochs = 100
     all_mae_histories = []
     num_val_samples = len(train_data) // k
 
@@ -86,7 +88,10 @@ if __name__ == "__main__":
     average_mae_history = [
         np.mean([x[i] for x in all_mae_histories]) for i in range(num_epochs)]
 
-    print(average_mae_history)
+    plt.plot(range(1, len(average_mae_history)+1), average_mae_history)
+    plt.xlabel('Epoch')
+    plt.ylabel('Validation MAE')
+    plt.show()
 
 
 

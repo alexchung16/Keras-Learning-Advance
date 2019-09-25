@@ -140,7 +140,7 @@ def separateDataset(cat_dst_dir, dog_dst_dir, cat_frame_list, dog_frame_list):
 # image preprocessing
 def imagePreprocessing():
     """
-    图像预处理
+    image preprocessing
     :return:
     """
     train_data_generate = ImageDataGenerator(rescale=1./255)
@@ -161,6 +161,44 @@ def imagePreprocessing():
     )
 
     return train_generator, val_generator
+
+
+def imageAugmentation():
+    """
+    image data augmentation
+    Note： Only augmentation train dataset but validation dataset
+    :return:
+    """
+    train_data_generate = ImageDataGenerator(rescale=1./255,
+                                             rotation_range=40,
+                                             width_shift_range=0.2,
+                                             height_shift_range=0.2,
+                                             shear_range=0.2,
+                                             zoom_range=0.2,
+                                             horizontal_flip=True,
+                                             vertical_flip=True)
+
+    # do not augmentation validation data
+    val_data_generate = ImageDataGenerator(rescale=1./255)
+
+    train_generator = train_data_generate.flow_from_directory(
+        directory=train_dir,
+        target_size=(150, 150),
+        batch_size=32,
+        class_mode='binary'
+    )
+
+    val_generator = val_data_generate.flow_from_directory(
+        directory=val_dir,
+        target_size=(150, 150),
+        batch_size=32,
+        class_mode='binary'
+    )
+
+    return train_generator, val_generator
+
+
+
 # def vgg16Net():
 #     """
 #     VGG16 Net
@@ -190,12 +228,45 @@ def cnnNet():
     model.add((layers.Conv2D(128, (3, 3), activation='relu')))
     # out feature map shape (17, 17, 128)
     model.add(layers.MaxPool2D((2, 2)))
+    # Dropout regularization layer
+    model.add(layers.Dropout(rate=0.5))
     # FCN(Dense) layer
     model.add(layers.Flatten())
     model.add(layers.Dense(512, activation='relu'))
     model.add(layers.Dense(1, activation='sigmoid'))
 
     return model
+
+
+def plotTrainValidationLossAccuracy(history):
+    """
+    Training validation loss and accuracy of epoch
+    :param history: training parameter
+    :return:
+    """
+    # history.keys() = ['val_loss', 'val_categorical_accuracy', 'loss', 'categorical_accuracy']
+    history_dict = history.history
+    loss = history_dict['loss']
+    acc = history_dict['acc']
+    val_acc = history_dict['val_acc']
+    val_loss = history_dict['val_loss']
+    epochs = range(1, len(loss) + 1)
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 8))
+    ax1.plot(epochs, loss, 'bo', label='Training loss')
+    ax1.plot(epochs, val_acc, 'b', label='Validation loss')
+    ax1.set_title('Training and validation loss')
+    ax1.set_xlabel('Epochs')
+    ax1.set_ylabel('Loss')
+    ax1.legend()
+
+    ax2.plot(epochs, acc, 'bo', label='Training accuracy')
+    ax2.plot(epochs, val_loss, 'b', label='Validation accuracy')
+    ax2.set_title('Training and validation accuracy')
+    ax2.set_xlabel('Epochs')
+    ax2.set_ylabel('Accuracy')
+    ax2.legend()
+    plt.show()
 
 
 def saveModel(model, model_name):
@@ -282,13 +353,14 @@ if __name__ == "__main__":
     history = model.fit_generator(
         generator=train_generator,
         steps_per_epoch=100,
-        epochs=2,
+        epochs=100,
         validation_data=val_generator,
         validation_steps=50,
     )
     saveModel(model, 'cnn_net.h5')
     seveData(history.history, 'history.pkl')
-
+    hist = loadData('history.pkl')
+    plotTrainValidationLossAccuracy((hist))
 
 
 

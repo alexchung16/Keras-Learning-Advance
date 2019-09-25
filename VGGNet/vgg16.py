@@ -6,6 +6,7 @@
 # @ Time 25/9/2019 AM 09:55
 
 import os
+import pickle
 import shutil
 import keras
 from keras import layers
@@ -13,7 +14,19 @@ from keras import models
 from keras import optimizers, losses, metrics
 from keras.datasets import mnist
 from keras.utils import to_categorical
+from keras.preprocessing.image import ImageDataGenerator
 import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+from keras.applications import vgg16
+
+# model path
+model_path = os.path.join(os.getcwd(), 'model')
+# train data path
+data_path = os.path.join(os.getcwd(), 'data')
+
+# tensorboard log path
+tb_path = os.path.join(os.getcwd(), 'logs')
+
 
 # origin dataset
 original_dataset_dir = '/home/alex/Documents/datasets/dogs-vs-cats/train'
@@ -77,7 +90,7 @@ except FileNotFoundError as e:
     print(e)
 
 
-def structureDataset(train_num=5000, val_num=1000, test_num=1000):
+def structureDataset(train_num=2000, val_num=1000, test_num=1000):
     """
     structure train dataset validation dataset test dataset by separate origin dataset
     :param train_num: train dataset num
@@ -123,12 +136,120 @@ def separateDataset(cat_dst_dir, dog_dst_dir, cat_frame_list, dog_frame_list):
         shutil.copy(cat_src, cat_dst)
         shutil.copy(dog_src, dog_dst)
 
+
+# image preprocessing
+def imagePreprocessing():
+    """
+    图像预处理
+    :return:
+    """
+    train_data_generate = ImageDataGenerator(rescale=1./255)
+    val_data_generate = ImageDataGenerator(rescale=1./255)
+
+    train_generator = train_data_generate.flow_from_directory(
+        directory=train_dir,
+        target_size=(150, 150),
+        batch_size=40,
+        class_mode='binary'
+    )
+
+    val_generator = val_data_generate.flow_from_directory(
+        directory=val_dir,
+        target_size=(150, 150),
+        batch_size=40,
+        class_mode='binary'
+    )
+
+    return train_generator, val_generator
 # def vgg16Net():
+#     """
+#     VGG16 Net
+#     :return:
+#     """
 #     model = models.Sequential()
-#     model.add()
+#     model.add(layers)
+
+
+def cnnNet():
+    """
+    cnn net
+    :return:
+    """
+    model = models.Sequential()
+    # convolution layer
+    # out feature map shape (148, 148, 32)
+    model.add(layers.Conv2D(filters=32, kernel_size=(3, 3), activation='relu', strides=1,
+                            input_shape=(150, 150, 3)))
+    # out feature map shape (74, 74, 32)
+    model.add(layers.MaxPool2D(pool_size=(2, 2)))
+    # out feature map shape (72, 72, 64)
+    model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+    # out feature map shape (36, 36, 64)
+    model.add(layers.MaxPool2D((2, 2)))
+    # out feature map shape (34, 34, 128)
+    model.add((layers.Conv2D(128, (3, 3), activation='relu')))
+    # out feature map shape (17, 17, 128)
+    model.add(layers.MaxPool2D((2, 2)))
+    # FCN(Dense) layer
+    model.add(layers.Flatten())
+    model.add(layers.Dense(512, activation='relu'))
+    model.add(layers.Dense(1, activation='sigmoid'))
+
+    return model
+
+
+def saveModel(model, model_name):
+    """
+    save model
+    :param model: model
+    :param model_name: model file name
+    :return:
+    """
+    try:
+        if os.path.exists(model_path) is False:
+            os.mkdir(model_path)
+            print('{0} has been created'.format(model_path))
+        # save model
+        model.save(os.path.join(model_path, model_name))
+    except:
+        raise Exception('model save failed')
+
+
+def seveData(data, data_name):
+    """
+    save data
+    :param obj: object
+    :param path: save path
+    :return:
+    """
+    try:
+        if os.path.exists(data_path) is False:
+            os.mkdir(data_path)
+        with open(os.path.join(data_path, data_name), 'wb') as f:
+            pickle.dump(data, f)
+    except:
+        print('data save failed')
+
+
+def loadData(data_name):
+    """
+    load data
+    :param obj: object
+    :param path: save path
+    :return:
+    """
+    try:
+        if os.path.exists(data_path) is False:
+            os.mkdir(data_path)
+        with open(os.path.join(data_path, data_name), 'rb') as f:
+            return pickle.load(f)
+    except:
+        print('data save failed')
 
 
 if __name__ == "__main__":
+    # tensorboard
+    tb_cb = keras.callbacks.TensorBoard(log_dir=tb_path, histogram_freq=1, write_images=1)
     # 构建数据
     # structureDataset()
     # 获取数据信息
@@ -141,4 +262,33 @@ if __name__ == "__main__":
     print(len(train_cat_list), len(train_dog_list))
     print(len(val_cat_list), len(val_dog_list))
     print(len(test_cat_list), len(test_dog_list))
+
+    # show sample image
+    # img = mpimg.imread(os.path.join(train_cat_dir, 'cat.0.jpg'))
+    # print(img.shape)
+    # plt.imshow(img)
+    # plt.show()
+
+    # model
+    model = cnnNet()
+    # print(model.summary())
+    model.compile(
+        optimizer=optimizers.RMSprop(lr=1e-4),
+        loss=losses.binary_crossentropy,
+        metrics=['accuracy']
+    )
+
+    train_generator, val_generator = imagePreprocessing()
+    history = model.fit_generator(
+        generator=train_generator,
+        steps_per_epoch=100,
+        epochs=2,
+        validation_data=val_generator,
+        validation_steps=50,
+    )
+    saveModel(model, 'cnn_net.h5')
+    seveData(history.history, 'history.pkl')
+
+
+
 

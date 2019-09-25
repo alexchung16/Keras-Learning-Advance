@@ -14,8 +14,10 @@ from keras import models, layers
 from keras import optimizers, losses, metrics
 from keras.models import load_model
 
+# model path
+model_path = os.path.join(os.getcwd(), 'model')
 # tensorboard path
-tb_path = os.getcwd() + r'/logs'
+tb_path = os.path.join(os.getcwd() + 'logs')
 
 
 def loadReutersData(num_words=10000):
@@ -84,22 +86,20 @@ def plotTrainValidationLossAccuracy(history):
     plt.show()
 
 
-def saveModel(model, model_path):
+def saveModel(model, model_name):
     """
     save model
     :param model: model
     :param model_name: model file name
     :return:
     """
-    fold_path = os.getcwd() + '\\model'
-    model_path = model_path
     try:
-        if not os.path.exists(fold_path):
-            os.mkdir(fold_path)
+        if os.path.exists(model_path) is False:
+            os.mkdir(model_path)
         # save model
-        model.save(model_path)
+        model.save(os.path.join(model_path, model_name))
     except:
-        raise Exception('model save fail')
+        raise Exception('model save failed')
 
 
 if __name__ == "__main__":
@@ -140,18 +140,11 @@ if __name__ == "__main__":
     plotTrainValidationLossAccuracy(history)
 
     # 创建模型保存路径
-    model_path = os.getcwd() + r'/model'
-    if os.path.exists(model_path):
-        print(model_path, 'is exist')
-    else:
-        os.mkdir(model_path)
-        print(model_path, 'has been successfully created')
-    model_path = model_path + '/reuters.h5'
     # save model
-    saveModel(model, model_path)
+    saveModel(model, 'reuters.h5')
 
     # load model
-    trained_model = load_model(model_path)
+    trained_model = load_model(os.path.join(model_path, 'reuters.h5'))
 
     # evaluate test
     evaluate_result = trained_model.evaluate(x_test, y_test)

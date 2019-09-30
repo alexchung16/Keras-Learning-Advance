@@ -78,6 +78,41 @@ def extract_feature(datasets_dir, sample_count):
             break
     return feature, labels
 
+def imageAugmentation():
+    """
+    image data augmentation
+    Note： Only augmentation train dataset but validation dataset
+    :return:
+    """
+    train_data_generate = ImageDataGenerator(rescale=1./255,
+                                             rotation_range=40,
+                                             width_shift_range=0.2,
+                                             height_shift_range=0.2,
+                                             shear_range=0.2,
+                                             zoom_range=0.2,
+                                             horizontal_flip=True,
+                                             fill_mode='nearest')
+
+    # do not augmentation validation data
+    val_data_generate = ImageDataGenerator(rescale=1./255)
+
+    train_generator = train_data_generate.flow_from_directory(
+        directory=train_dir,
+        target_size=(150, 150),
+        batch_size=32,
+        class_mode='binary'
+    )
+
+    val_generator = val_data_generate.flow_from_directory(
+        directory=val_dir,
+        target_size=(150, 150),
+        batch_size=32,
+        class_mode='binary'
+    )
+
+    return train_generator, val_generator
+
+
 def subDenseNet():
     """
     construct sub Net only constructed by dense layer
@@ -86,6 +121,17 @@ def subDenseNet():
     model = models.Sequential()
     model.add(layers.Dense(units=256, activation='relu', input_shape=(4*4*512, )))
     model.add(layers.Dropout(rate=0.5))
+    model.add(layers.Dense(units=1, activation='sigmoid'))
+    return model
+
+def vgg16ConvBaseNet():
+    # freeze vgg model
+    conv_base.trainable = False
+    model = models.Sequential()
+    model.add(conv_base)
+    # flatten layer
+    model.add(layers.Flatten())
+    model.add(layers.Dense(units=256, activation='relu'))
     model.add(layers.Dense(units=1, activation='sigmoid'))
     return model
 
@@ -121,25 +167,44 @@ def plotTrainValidationLossAccuracy(history):
 
 if __name__ == "__main__":
 
-    train_feature, train_labels = extract_feature(train_dir, 2000)
-    val_feature, val_labels = extract_feature(val_dir, 1000)
-    test_feature, test_labels = extract_feature(test_dir, 1000)
+    # preprocessing dataset
+    # method 1 by sub cnn
+    # train_feature, train_labels = extract_feature(train_dir, 2000)
+    # val_feature, val_labels = extract_feature(val_dir, 1000)
+    # test_feature, test_labels = extract_feature(test_dir, 1000)
+    #
+    # # flat dataset as new datasets
+    # train_feature = np.reshape(train_feature, (2000, 4*4*512))
+    # val_feature = np.reshape(val_feature, (1000, 4*4*512))
+    # test_feature = np.reshape(test_feature, (1000, 4 * 4 * 512))
 
-    print(train_feature.shape)
-
-    # flat dataset as new datasets
-    train_feature = np.reshape(train_feature, (2000, 4*4*512))
-    val_feature = np.reshape(val_feature, (1000, 4*4*512))
-    test_feature = np.reshape(test_feature, (1000, 4 * 4 * 512))
+    # method 2 by end to end cnn
+    # owe into use augmentation image
+    train_generator, val_generator = imageAugmentation()
 
     # struct dense layer
-    model = subDenseNet()
+    # method 1
+    # model = subDenseNet()
+    # # method 2
+    model = vgg16ConvBaseNet()
+
+    # print tensor num of the model (kernel, bias)
+    print(len(model.trainable_weights))
 
     model.compile(optimizer=optimizers.RMSprop(lr=2e-5),
                   loss = losses.binary_crossentropy,
                   metrics=['accuracy'])
-    history = model.fit(x=train_feature, y=train_labels, batch_size=20, epochs=30,
-              validation_data=(val_feature, val_labels))
+    # history = model.fit(x=train_feature, y=train_labels, batch_size=20, epochs=30,
+    #           validation_data=(val_feature, val_labels))
+
+    history = model.fit_generator(
+        generator=train_generator,
+        steps_per_epoch=100,
+        epochs=30,
+        validation_data=val_generator,
+        validation_steps=50,
+    )
+
 
     plotTrainValidationLossAccuracy(history)
 

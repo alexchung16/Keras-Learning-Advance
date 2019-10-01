@@ -357,7 +357,9 @@ if __name__ == "__main__":
         validation_data=val_generator,
         validation_steps=50,
     )
+    # save model
     saveModel(model, 'cnn_net.h5')
+    # save train history index
     seveData(history.history, 'cnn_net.pkl')
     # hist = loadData('history.pkl')
     # plotTrainValidationLossAccuracy((hist))

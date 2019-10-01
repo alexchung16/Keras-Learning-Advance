@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @ File vgg16.py
+# @ File cnn.py
 # @ Description
 # @ Author alexchung
 # @ Time 25/9/2019 AM 09:55
@@ -345,7 +345,7 @@ if __name__ == "__main__":
     # print(model.summary())
     model.compile(
         optimizer=optimizers.RMSprop(lr=1e-4),
-        loss=losses.binary_crossentropy,
+        loss='binary_crossentropy',
         metrics=['accuracy']
     )
 
@@ -358,9 +358,9 @@ if __name__ == "__main__":
         validation_steps=50,
     )
     saveModel(model, 'cnn_net.h5')
-    seveData(history.history, 'history.pkl')
-    hist = loadData('history.pkl')
-    plotTrainValidationLossAccuracy((hist))
+    seveData(history.history, 'cnn_net.pkl')
+    # hist = loadData('history.pkl')
+    # plotTrainValidationLossAccuracy((hist))
 
 
 

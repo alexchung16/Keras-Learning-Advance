@@ -7,6 +7,7 @@
 
 
 import os
+import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 from keras.applications import VGG16
@@ -14,7 +15,10 @@ from keras import models, layers
 from keras import optimizers, losses
 from keras_preprocessing.image import ImageDataGenerator
 
-
+# model path
+model_path = os.path.join(os.getcwd(), 'model')
+# train data path
+data_path = os.path.join(os.getcwd(), 'data')
 # data path
 # origin dataset
 original_dataset_dir = '/home/alex/Documents/datasets/dogs-vs-cats/train'
@@ -127,6 +131,7 @@ def subDenseNet():
 def vgg16ConvBaseNet():
     # freeze vgg model
     conv_base.trainable = False
+
     model = models.Sequential()
     model.add(conv_base)
     # flatten layer
@@ -134,6 +139,62 @@ def vgg16ConvBaseNet():
     model.add(layers.Dense(units=256, activation='relu'))
     model.add(layers.Dense(units=1, activation='sigmoid'))
     return model
+
+def vgg16FineTuneConvBaseNet():
+    """
+    unfreeze some layer to fine tune vgg16
+    :return:
+    """
+    # tune the layer attributes of vgg16 pretrain model
+    conv_base.trainableb = True
+
+    trainable_status = False
+    for layer in conv_base.layers:
+        if layer.name == 'block5_conv1':
+            trainable_status = True
+        layer.trainable = trainable_status
+
+    model = models.Sequential()
+    model.add(conv_base)
+    # flatten layer
+    model.add(layers.Flatten())
+    model.add(layers.Dense(units=256, activation='relu'))
+    model.add(layers.Dense(units=1, activation='sigmoid'))
+
+    return model
+
+
+def saveModel(model, model_name):
+    """
+    save model
+    :param model: model
+    :param model_name: model file name
+    :return:
+    """
+    try:
+        if os.path.exists(model_path) is False:
+            os.mkdir(model_path)
+            print('{0} has been created'.format(model_path))
+        # save model
+        model.save(os.path.join(model_path, model_name))
+    except:
+        raise Exception('model save failed')
+
+
+def seveData(data, data_name):
+    """
+    save data
+    :param obj: object
+    :param path: save path
+    :return:
+    """
+    try:
+        if os.path.exists(data_path) is False:
+            os.mkdir(data_path)
+        with open(os.path.join(data_path, data_name), 'wb') as f:
+            pickle.dump(data, f)
+    except:
+        print('data save failed')
 
 def plotTrainValidationLossAccuracy(history):
     """
@@ -186,27 +247,34 @@ if __name__ == "__main__":
     # method 1
     # model = subDenseNet()
     # # method 2
-    model = vgg16ConvBaseNet()
+    # model = vgg16ConvBaseNet()
+    # method 3
+    model = vgg16FineTuneConvBaseNet()
 
-    # print tensor num of the model (kernel, bias)
-    print(len(model.trainable_weights))
+    print(model.summary())
 
-    model.compile(optimizer=optimizers.RMSprop(lr=2e-5),
-                  loss = losses.binary_crossentropy,
-                  metrics=['accuracy'])
+    model.compile(optimizer=optimizers.RMSprop(lr=1e-5),
+                  loss=losses.binary_crossentropy,
+                  metrics=['acc'])
     # history = model.fit(x=train_feature, y=train_labels, batch_size=20, epochs=30,
     #           validation_data=(val_feature, val_labels))
 
     history = model.fit_generator(
         generator=train_generator,
         steps_per_epoch=100,
-        epochs=30,
+        epochs=100,
         validation_data=val_generator,
         validation_steps=50,
     )
 
-
+    # plot model validation index
     plotTrainValidationLossAccuracy(history)
+
+    saveModel(model, 'fine_vgg16.h5')
+    seveData(history.history, 'fine_vgg16.pkl')
+
+
+
 
 
 

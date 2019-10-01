@@ -270,7 +270,9 @@ if __name__ == "__main__":
     # plot model validation index
     plotTrainValidationLossAccuracy(history)
 
+    # save trained model
     saveModel(model, 'fine_vgg16.h5')
+    # save train history index
     seveData(history.history, 'fine_vgg16.pkl')
 
 

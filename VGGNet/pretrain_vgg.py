@@ -159,6 +159,7 @@ def vgg16FineTuneConvBaseNet():
     # flatten layer
     model.add(layers.Flatten())
     model.add(layers.Dense(units=256, activation='relu'))
+    model.add(layers.Dropout(rate=0.5))
     model.add(layers.Dense(units=1, activation='sigmoid'))
 
     return model

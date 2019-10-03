@@ -126,22 +126,29 @@ def generatePattern(model, layer_name, filter_index, iterate_num, img_size):
     layer_output = model.get_layer(layer_name).output
     # loss function MSE
     loss = K.mean(layer_output[:, :, :, filter_index])
+
     # compute gradient of loss
     grads = K.gradients(loss, model.input)[0]
+
     # normalization grad
     grads /= (K.sqrt(K.mean(K.square(grads))) + 1e-5)
+
     # construct function to compute loss and grad
     iterate = K.function([model.input], [loss, grads])
+
     # contain noise range between 0 to 20
-    input_img_data = (np.random.random((1, img_size, img_size, 3)) * 40 - 20) + 128
+    input_img_data = np.random.random((1, img_size, img_size, 3))*20 + 128.
     # update step of gradient
-    step = 0.1
+    step = 1.
     for i in range(iterate_num):
         loss_value, grads_value = iterate([input_img_data])
         input_img_data += grads_value * step
 
     img = input_img_data[0]
     return deprocessImage(img)
+
+    # 构建一个损失函数，将该层第n个过滤器的激活最大化
+
 
 
 def visualizeKernelPattern(model, layer_num, kernel_num,  iterate_num, img_size):
@@ -159,7 +166,6 @@ def visualizeKernelPattern(model, layer_num, kernel_num,  iterate_num, img_size)
 
     n_row = 8
     n_col = kernel_num // n_row
-    size = 64
     for layer_name in layers_name:
         display_grid = np.zeros((n_col * img_size + 7 * margin, n_row * img_size + 7 * margin, 3))
         for i in range(n_col):
@@ -168,15 +174,21 @@ def visualizeKernelPattern(model, layer_num, kernel_num,  iterate_num, img_size)
                 display_grid[i*img_size+margin*i: (i+1)*img_size+margin*i,
                             j*img_size+margin*j: (j+1)*img_size+margin*j, :] = filter_img
 
-        print(display_grid)
+        # note: require the pixel intensity size between 0 and 1
+        display_grid /= 255.
         plt.figure(figsize=(20, 20))
         plt.title('{0} kernel visual'.format(layer_name))
+
+        plt.imshow(display_grid)
 
         if os.path.exists(image_path):
             pass
         else:
             os.mkdir(image_path)
         plt.savefig(image_path + '/{0} kernel.jpg'.format(layer_name))
+        plt.show()
+
+        # plt.show()
 
 
 
@@ -193,22 +205,28 @@ def deprocessImage(x):
     x = np.clip(x, 0, 1)
     x *= 255
     x = np.clip(x, 0, 255).astype('uint8')
+    # 尺度变换到[0,1]
     return x
 
 
 if __name__ == "__main__":
     # visual activation layer
-    img = image.load_img(path=img_path, target_size=(150, 150))
-    img_tensor = image.img_to_array(img)
-    img_tensor = np.expand_dims(img_tensor, axis=0)
-    img_tensor = img_tensor/255.
-    model = models.load_model(model_path+'/cnn_net.h5')
+    # img = image.load_img(path=img_path, target_size=(150, 150))
+    # img_tensor = image.img_to_array(img)
+    # img_tensor = np.expand_dims(img_tensor, axis=0)
+    # img_tensor = img_tensor/255.
+    # model = models.load_model(model_path+'/cnn_net.h5')
 
-    visualizeAcitivitionLayer(model, 6, img_tensor)
+    # visualizeAcitivitionLayer(model, 6, img_tensor)
+    # plt.imshow(img_tensor[0])
+    # plt.show()
 
     # visual kernel
-    # model = VGG16(weights='imagenet',
-    #               include_top=False)
+    model = VGG16(weights='imagenet',
+                  include_top=False)
+    # layer_name = 'block1_conv1'
     # img = generatePattern(model, layer_name, 0, 40, 64)
-    # visualizeKernelPattern(model, 8, 64, 40, 64)
+    visualizeKernelPattern(model, 12, 64, 40, 64)
+
+
 

@@ -19,6 +19,9 @@ from keras.preprocessing import image
 model_path = os.path.join(os.getcwd(), 'model')
 # train data path
 data_path = os.path.join(os.getcwd(), 'data')
+# image path
+image_path = os.path.join(os.getcwd(), 'iamge')
+
 # origin dataset
 original_dataset_dir = '/home/alex/Documents/datasets/dogs-vs-cats/train'
 # separate dataset
@@ -101,7 +104,12 @@ def visualizeAcitivitionLayer(model, layer_num, img_tensor):
         plt.title(layer_name)
         plt.grid(False)
         plt.imshow(display_grid, aspect='auto', cmap='viridis')
-        plt.show()
+        if os.path.exists(image_path):
+            pass
+        else:
+            os.mkdir(image_path)
+        plt.savefig(image_path + '/{0}.jpg'.format(layer_name))
+
 
 
 

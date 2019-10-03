@@ -9,10 +9,8 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-from keras.applications import VGG16
 from keras import models, layers
 from keras import optimizers, losses
-from keras_preprocessing.image import ImageDataGenerator
 from keras.preprocessing import image
 
 # model path
@@ -20,7 +18,7 @@ model_path = os.path.join(os.getcwd(), 'model')
 # train data path
 data_path = os.path.join(os.getcwd(), 'data')
 # image path
-image_path = os.path.join(os.getcwd(), 'iamge')
+image_path = os.path.join(os.getcwd(), 'image')
 
 # origin dataset
 original_dataset_dir = '/home/alex/Documents/datasets/dogs-vs-cats/train'
@@ -72,7 +70,7 @@ def visualizeAcitivitionLayer(model, layer_num, img_tensor):
     n_row = 16
 
     for layer_name, layer_activate in zip(layer_names, activation):
-        print(layer_name)
+
         # feature num of the layer
         n_features = layer_activate.shape[-1]
         # feature image size
@@ -82,7 +80,7 @@ def visualizeAcitivitionLayer(model, layer_num, img_tensor):
         n_col = n_features // n_row
         # flat image
         display_grid = np.zeros((length_feature_size*n_col, width_feature_size*n_row))
-        print(display_grid.shape)
+
         for col in range(n_col):
             for row in range(n_row):
                 channel_image = layer_activate[0, :, :, col*n_row+row]
@@ -97,10 +95,11 @@ def visualizeAcitivitionLayer(model, layer_num, img_tensor):
                 display_grid[col*width_feature_size: (col+1)*width_feature_size,
                              row*length_feature_size: (row+1)*length_feature_size] = channel_image
 
+        # 尺度转换
+        weigth_scale = 1. / length_feature_size
+        height_scale = 1. / width_feature_size
 
-        weigth_scale = 1. / n_row
-        height_ccale = 1. / n_col
-        plt.figure(figsize=(weigth_scale*display_grid.shape[1], height_ccale*display_grid.shape[0]))
+        plt.figure(figsize=(weigth_scale*display_grid.shape[1], height_scale*display_grid.shape[0]))
         plt.title(layer_name)
         plt.grid(False)
         plt.imshow(display_grid, aspect='auto', cmap='viridis')
@@ -109,8 +108,7 @@ def visualizeAcitivitionLayer(model, layer_num, img_tensor):
         else:
             os.mkdir(image_path)
         plt.savefig(image_path + '/{0}.jpg'.format(layer_name))
-
-
+        # plt.show()
 
 
 
@@ -123,4 +121,3 @@ if __name__ == "__main__":
     model = models.load_model(model_path+'/cnn_net.h5')
 
     visualizeAcitivitionLayer(model, 6, img_tensor)
-    # layer_outputs = [layer.output for layer in model.layers[:8]

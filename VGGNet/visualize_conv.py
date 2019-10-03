@@ -22,6 +22,9 @@ data_path = os.path.join(os.getcwd(), 'data')
 # image path
 image_path = os.path.join(os.getcwd(), 'image')
 
+# dataset
+dataset_path = os.path.join(os.path.dirname(os.getcwd()), 'dataset')
+
 # origin dataset
 original_dataset_dir = '/home/alex/Documents/datasets/dogs-vs-cats/train'
 # separate dataset
@@ -147,11 +150,8 @@ def generatePattern(model, layer_name, filter_index, iterate_num, img_size):
     img = input_img_data[0]
     return deprocessImage(img)
 
-    # 构建一个损失函数，将该层第n个过滤器的激活最大化
 
-
-
-def visualizeKernelPattern(model, layer_num, kernel_num,  iterate_num, img_size):
+def visualizeFilterPattern(model, layer_num, kernel_num,  iterate_num, img_size):
     """
     visual model kernel pattern
     :param model:
@@ -188,9 +188,6 @@ def visualizeKernelPattern(model, layer_num, kernel_num,  iterate_num, img_size)
         plt.savefig(image_path + '/{0} kernel.jpg'.format(layer_name))
         plt.show()
 
-        # plt.show()
-
-
 
 def deprocessImage(x):
     """
@@ -209,6 +206,10 @@ def deprocessImage(x):
     return x
 
 
+def visulizeClassActivateMap():
+    pass
+
+
 if __name__ == "__main__":
     # visual activation layer
     # img = image.load_img(path=img_path, target_size=(150, 150))
@@ -222,11 +223,21 @@ if __name__ == "__main__":
     # plt.show()
 
     # visual kernel
-    model = VGG16(weights='imagenet',
-                  include_top=False)
+    # model = VGG16(weights='imagenet',
+    #               include_top=False)
     # layer_name = 'block1_conv1'
     # img = generatePattern(model, layer_name, 0, 40, 64)
-    visualizeKernelPattern(model, 12, 64, 40, 64)
+    # visualizeFilterPattern(model, 12, 64, 40, 64)
+
+    # visualize heatmap of class activation
+    img_path = dataset_path+ '/commons_elephant.jpg'
+    img = image.load_img(img_path, target_size=(224, 224))
+    x_tensor = image.img_to_array(img)
+    x = np.expand_dims(x_tensor, axis=0)
+    x /= 255.
+    plt.imshow(x[0])
+    plt.show()
+
 
 
 

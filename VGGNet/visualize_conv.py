@@ -277,10 +277,11 @@ if __name__ == "__main__":
     img = image.load_img(img_path, target_size=(224, 224))
     x_tensor = image.img_to_array(img)
     x = np.expand_dims(x_tensor, axis=0)
-
+    # read image with cv.imread
     cv_img = cv.imread(img_path)
-
+    # auto adapt modify image size
     cv_img = cv.resize(cv_img, (cv_img.shape[1]*512//cv_img.shape[0], 512))
+
     visulizeClassActivateMap(model, x, cv_img)
 
     print(cv_img.shape)

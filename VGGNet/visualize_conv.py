@@ -14,6 +14,8 @@ from keras import optimizers, losses
 from keras.preprocessing import image
 from keras.applications import VGG16
 from keras import backend as K
+from keras.applications.vgg16 import preprocess_input, decode_predictions
+import cv2 as cv
 
 # model path
 model_path = os.path.join(os.getcwd(), 'model')
@@ -206,8 +208,48 @@ def deprocessImage(x):
     return x
 
 
-def visulizeClassActivateMap():
-    pass
+def visulizeClassActivateMap(model, img_tensor, cv_img):
+    x = preprocess_input(img_tensor)
+    predict_result = model.predict(x)
+    # print('predicted: ', decode_predictions(predict_result, top=3)[0])
+    # get most probability class result(top 1)
+    predict_label = decode_predictions(predict_result, top=1)[0][0][1]
+
+    max_softmax_index = np.argmax(predict_result[0])
+
+    predict_output = model.output[:, max_softmax_index]
+    last_conv_layer = model.get_layer('block5_conv3')
+
+    grads = K.gradients(predict_output, last_conv_layer.output)[0]
+
+    pooled_grads = K.mean(grads, axis=(0, 1, 2))
+
+    iterate = K.function([model.input], [pooled_grads, last_conv_layer.output[0]])
+
+    pooled_grads_value, conv_layer_output_value = iterate([x])
+
+    for i in range(512):
+        conv_layer_output_value[:, :, i] *= pooled_grads_value[i]
+
+    heatmap = np.mean(conv_layer_output_value, axis=-1)
+
+    # sure heatmap size > 0
+    heatmap = np.maximum(heatmap, 0)
+    # normalize heatmap
+    heatmap /= np.max(heatmap)
+    # plt.imshow(heatmap)
+    # plt.show()
+
+    img = cv_img
+    heatmap = cv.resize(heatmap, (img.shape[1], img.shape[0]))
+    heatmap = np.uint8(255 * heatmap)
+    heatmap = cv.applyColorMap(heatmap, cv.COLORMAP_JET)
+    superimposed_img = heatmap * 0.4 + img
+    # modify pixel size to (0, 255)
+    superimposed_img = np.clip(superimposed_img, 0, 255).astype('uint8')
+    cv.imshow('{0} origin heatmap'.format(predict_label), heatmap)
+    cv.imshow('{0} mix heatmap'.format(predict_label), superimposed_img)
+    cv.waitKey(0)
 
 
 if __name__ == "__main__":
@@ -230,13 +272,15 @@ if __name__ == "__main__":
     # visualizeFilterPattern(model, 12, 64, 40, 64)
 
     # visualize heatmap of class activation
+    model = VGG16(weights='imagenet')
     img_path = dataset_path+ '/commons_elephant.jpg'
     img = image.load_img(img_path, target_size=(224, 224))
     x_tensor = image.img_to_array(img)
     x = np.expand_dims(x_tensor, axis=0)
-    x /= 255.
-    plt.imshow(x[0])
-    plt.show()
+
+    cv_img = cv.imread(img_path)
+    visulizeClassActivateMap(model, x, cv_img)
+
 
 
 

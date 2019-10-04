@@ -273,15 +273,17 @@ if __name__ == "__main__":
 
     # visualize heatmap of class activation
     model = VGG16(weights='imagenet')
-    img_path = dataset_path+ '/commons_elephant.jpg'
+    img_path = dataset_path+ '/commons_elephant1.jpg'
     img = image.load_img(img_path, target_size=(224, 224))
     x_tensor = image.img_to_array(img)
     x = np.expand_dims(x_tensor, axis=0)
 
     cv_img = cv.imread(img_path)
+
+    cv_img = cv.resize(cv_img, (cv_img.shape[1]*512//cv_img.shape[0], 512))
     visulizeClassActivateMap(model, x, cv_img)
 
-
+    print(cv_img.shape)
 
 
 

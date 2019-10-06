@@ -12,7 +12,7 @@ from keras import optimizers, losses, metrics
 
 from keras import Model
 from keras.layers import Input, Flatten, Dense
-from keras.layers.convolutional import Conv2D, MaxPooling2D
+# from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.datasets import mnist
 from keras.utils import to_categorical
 
@@ -71,18 +71,18 @@ def MNIST():
 
 def MNISTFunctionAPI():
     """
-    keras function api realization
+    keras function API realization
     :return:
     """
-    input_tensor = Input(shape=(28, 28, 1))
-    x = Conv2D(filters=32, kernel_size=(3, 3), strides=(1, 1), activation='relu')(input_tensor)
-    x = MaxPooling2D(pool_size=(2, 2), strides=(2 ,2))(x)
-    x = Conv2D(filters=64, kernel_size=(3, 3), strides=(1, 1), activation='relu')(x)
-    x = MaxPooling2D(pool_size=(2, 2))(x)
-    x = Conv2D(filters=128, kernel_size=(3, 3), strides=(1, 1), activation='relu')(x)
-    x = Flatten()(x)
-    x = Dense(units=64, activation='relu')(x)
-    output_tensor = Dense(units=10, activation='softmax')(x)
+    input_tensor = layers.Input(shape=(28, 28, 1))
+    x = layers.Conv2D(filters=32, kernel_size=(3, 3), strides=(1, 1), activation='relu')(input_tensor)
+    x = layers.MaxPooling2D(pool_size=(2, 2), strides=(2 ,2))(x)
+    x = layers.Conv2D(filters=64, kernel_size=(3, 3), strides=(1, 1), activation='relu')(x)
+    x = layers.MaxPooling2D(pool_size=(2, 2))(x)
+    x = layers.Conv2D(filters=128, kernel_size=(3, 3), strides=(1, 1), activation='relu')(x)
+    x = layers.Flatten()(x)
+    x = layers.Dense(units=64, activation='relu')(x)
+    output_tensor = layers.Dense(units=10, activation='softmax')(x)
     model = Model(inputs= input_tensor, outputs=output_tensor)
     return model
 

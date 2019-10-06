@@ -121,9 +121,9 @@ def plotTrainValidationLossAccuracy(history):
 if __name__ == "__main__":
     tb_cb = keras.callbacks.TensorBoard(log_dir=tb_path, histogram_freq=1, write_images=1)
 
-    seq_model = MNIST()
+    # seq_model = MNIST()
+    # print(seq_model.summary())
     model = MNISTFunctionAPI()
-    print(seq_model.summary())
     print(model.summary())
     (train_images, train_labels), (test_images, test_labels) = loadMNISTData()
 

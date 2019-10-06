@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @ File multiple_input.py
+# @ File multiple_input_single_output.py
 # @ Description
 # @ Author alexchung
 # @ Time 6/10/2019 PM 14:42

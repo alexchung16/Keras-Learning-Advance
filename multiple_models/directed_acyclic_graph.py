@@ -39,6 +39,44 @@ def inceptionModule():
     return model
 
 
+def identityResidualConnect():
+    """
+    identity residual connect when the feature map size are same
+    :return:
+    """
+
+    x = layers.Input(shape=(224, 224, 128))
+    y = layers.Conv2D(filters=128, kernel_size=3, activation='relu', padding='same')(x)
+    y = layers.Conv2D(filters=128, kernel_size=3, activation='relu', padding='same')(y)
+    y = layers.Conv2D(filters=128, kernel_size=3, activation='relu', padding='same')(y)
+
+    y = layers.add([y, x])
+
+    model = Model(inputs=x, outputs=y)
+
+    return model
+
+
+def linearResidualConnect():
+    """
+    linear residual connect when the feature map size are different
+    :return:
+    """
+
+    x = layers.Input(shape=(224, 224, 3))
+    y = layers.Conv2D(filters=128, kernel_size=3, activation='relu', padding='same')(x)
+    y = layers.Conv2D(filters=128, kernel_size=3, activation='relu', padding='same')(y)
+    y = layers.MaxPooling2D(pool_size=2, strides=2)(y)
+
+    residual = layers.Conv2D(filters=128, kernel_size=1, strides=2, padding='same')(x)
+    y = layers.add([y, residual])
+
+    model = Model(inputs=x, outputs=y)
+
+    return model
+
 if __name__ == "__main__":
-    model =inceptionModule()
+    # model = inceptionModule()
+    # model = identityResidualConnect()
+    model = linearResidualConnect()
     print(model.summary())

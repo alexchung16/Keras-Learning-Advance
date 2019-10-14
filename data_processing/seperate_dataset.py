@@ -7,8 +7,9 @@
 
 import os
 import pickle
+import numpy as np
 import shutil
-
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
 # origin dataset
 original_dataset_dir = '/home/alex/Documents/datasets/dogs-vs-cats/train'
@@ -19,9 +20,9 @@ train_dir = os.path.join(base_dir, 'train')
 test_dir = os.path.join(base_dir, 'test')
 
 # train_label.txt
-train_label = os.path.join(train_dir, 'train_label.txt')
+train_label = os.path.join(train_dir, 'label.txt')
 # test_label.txt
-test_label = os.path.join(test_dir, 'test_label.txt')
+test_label = os.path.join(test_dir, 'label.txt')
 
 def makedir(path):
     """
@@ -99,17 +100,34 @@ if __name__ == "__main__":
     # split
     file_list = []
     class_list = []
+    classes = []
     with open(train_label, 'r') as fr:
         all_lines = fr.readlines()
         # for line in all_line:
         #     class_list += line.strip('\n').split(',')
         for line_index, line_content in enumerate(all_lines):
             line_content = line_content.strip('\n').split(',')
+
             file_list.append(line_content[0])
             class_list.append(line_content[1])
+            # class_list.append(classes.index(line_content[1]))
         fr.close()
-    print(file_list)
-    print(class_list)
+    lf = LabelEncoder().fit(class_list)
+    sparse_label = lf.transform(class_list).tolist()
+    sparse_classes = lf.classes_
+    print(sparse_label)
+    print(sparse_classes)
+    # label onehot encode
+    class_array = np.array(class_list).reshape(len(class_list), 1)
+    lof = OneHotEncoder().fit(class_array)
+    onehot_label = lof.transform(class_array).toarray()
+    print(onehot_label)
+    # print(onehot_classes)
 
+
+
+
+    # lf = LabelEncoder().fit(labels)
+    # dataLabel = lf.transform(labels).tolist()
 
 

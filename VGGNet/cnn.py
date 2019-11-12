@@ -150,14 +150,14 @@ def imagePreprocessing():
         directory=train_dir,
         target_size=(150, 150),
         batch_size=40,
-        class_mode='binary'
+        class_mode='categorical'
     )
 
     val_generator = val_data_generate.flow_from_directory(
         directory=val_dir,
         target_size=(150, 150),
         batch_size=40,
-        class_mode='binary'
+        class_mode='categorical'
     )
 
     return train_generator, val_generator
@@ -185,14 +185,14 @@ def imageAugmentation():
         directory=train_dir,
         target_size=(150, 150),
         batch_size=32,
-        class_mode='binary'
+        class_mode='categorical'
     )
 
     val_generator = val_data_generate.flow_from_directory(
         directory=val_dir,
         target_size=(150, 150),
         batch_size=32,
-        class_mode='binary'
+        class_mode='categorical'
     )
 
     return train_generator, val_generator
@@ -233,7 +233,7 @@ def cnnNet():
     # FCN(Dense) layer
     model.add(layers.Flatten())
     model.add(layers.Dense(512, activation='relu'))
-    model.add(layers.Dense(1, activation='sigmoid'))
+    model.add(layers.Dense(2, activation='softmax'))
 
     return model
 
@@ -342,10 +342,14 @@ if __name__ == "__main__":
 
     # model
     model = cnnNet()
+    print(model.summary())
+    weight, bias = model.get_layer(name='conv2d_1').get_weights()
+    print(weight.shape)
+    print(weight)
     # print(model.summary())
     model.compile(
         optimizer=optimizers.RMSprop(lr=1e-4),
-        loss='binary_crossentropy',
+        loss='categorical_crossentropy',
         metrics=['accuracy']
     )
 
@@ -357,10 +361,10 @@ if __name__ == "__main__":
         validation_data=val_generator,
         validation_steps=50,
     )
-    # save model
-    saveModel(model, 'cnn_net.h5')
-    # save train history index
-    seveData(history.history, 'cnn_net.pkl')
+    # # save model
+    # saveModel(model, 'cnn_net.h5')
+    # # save train history index
+    # seveData(history.history, 'cnn_net.pkl')
     # hist = loadData('history.pkl')
     # plotTrainValidationLossAccuracy((hist))
 

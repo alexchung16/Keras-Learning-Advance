@@ -47,8 +47,10 @@ class DenseNet():
         # 230 x 230 x 3
         x = Convolution2D(filters=num_filters, kernel_size=(7, 7), strides=(2, 2), use_bias=False,
                           name='conv1', padding='valid')(x)
+        x = BatchNormalization(epsilon=batch_norm_epsilon, axis=self.concat_axis, name='conv1_bn')(x)
         # 112 x 112 x 3
         x = Scale(axis=self.concat_axis, name='conv1_scale')(x)
+        x = Activation(activation='relu', name='relu1')(x)
         # 112 x 112 x 3
         x = ZeroPadding2D(padding=(1, 1), name='pool1_zeropadding')(x)
         # 114 x 114 x 3

@@ -27,5 +27,5 @@ if __name__ == "__main__":
                             num_dense_block=num_dense_block, num_layers=num_layers, reduction=reduction,
                             drop_rate=1.0 - keep_prob, weight_decay=weight_decay, batch_norm_epsilon=batch_norm_epsilon
                             ).inference()
-    # densenet_121.load_weights(weights_path=pretrain_model)
+    # densenet_121.load_weights(pretrain_model)
     print(densenet_121.summary())

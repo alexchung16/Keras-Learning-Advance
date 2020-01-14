@@ -15,9 +15,9 @@ import matplotlib.pyplot as plt
 import struct
 
 # origin dataset
-original_dataset_dir = '/home/alex/Documents/datasets/dogs_vs_cat_separate/train100'
+original_dataset_dir = '/home/alex/Documents/dataset/flower_perate'
 # separate dataset
-binary_dir = '/home/alex/Documents/datasets/dogs_cat_binary'
+binary_dir = '/home/alex/Documents/dataset/flower_binary'
 # train dataset
 # train_dir = os.path.join(base_dir, 'train')
 # test_dir = os.path.join(base_dir, 'test')

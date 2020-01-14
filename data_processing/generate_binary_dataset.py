@@ -53,7 +53,7 @@ def binaryRecord(image_data, label_data):
     return record_byte
 
 
-def constructBinaryDataset(origin_dir, bin_dir=None, classes_name=None, img_height=224, img_width=224):
+def genarateBinaryDataset(origin_dir, bin_dir=None, classes_name=None, img_height=224, img_width=224):
     """
     construct binary dataset
     :param origin_path:
@@ -111,6 +111,7 @@ def constructBinaryDataset(origin_dir, bin_dir=None, classes_name=None, img_heig
                 num_samples += 1
             except Exception as e:
                 print('image {0} read failed due to {1}'.format(img_path, e))
+                continue
         print('There are {0} samples been wrote to {1}'.format(num_samples, bin_path))
         fa.close()
 
@@ -192,7 +193,7 @@ if __name__ == "__main__":
     image_length = IMAGE_HEIGHT * IMAGE_WIDTH * IMAGE_CHANNEL
 
 
-    constructBinaryDataset(origin_dir=original_dataset_dir,
+    genarateBinaryDataset(origin_dir=original_dataset_dir,
                            bin_dir=binary_dir,
                            img_height=IMAGE_HEIGHT,
                            img_width=IMAGE_WIDTH)

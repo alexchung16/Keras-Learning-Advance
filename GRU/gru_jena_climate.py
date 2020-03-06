@@ -54,12 +54,14 @@ def data_generate(data, lookback, delay, min_index, max_index, shuffle=False, ba
             targets[j] = data[index[j] + delay][1]
         yield samples, targets
 
+
+
 if __name__ == "__main__":
 
 
     # load data
     data = pd.read_csv(jena_dir)
-    print(data.shape) # (420551, 15)
+    # print(data.shape) # (420551, 15)
     # get header
     data_header = data.columns.values
     # print(data_header) # ['Date Time' 'p (mbar)' 'T (degC)' 'Tpot (K)' 'Tdew (degC)' 'rh (%)' 'VPmax (mbar)'
@@ -75,9 +77,9 @@ if __name__ == "__main__":
 
     # data preprocess
     # normalizing data
-    mean = np.mean(input_data[:20000], axis=0)
+    mean = input_data[:200000].mean(axis=0)
     input_data -= mean
-    std = np.std(input_data[:2000], axis=0)
+    std = input_data[:200000].std(axis=0)
     input_data /= std
 
     # test generate
@@ -110,24 +112,26 @@ if __name__ == "__main__":
                                   step=step,
                                   batch_size=batch_size)
 
-    # cacu
+
     val_steps = (300000 - 200001 - lookback) // batch_size
     test_steps = (len(input_data) - 300001 - lookback) // batch_size
 
     # GRU network
-
     model = Sequential()
-    model.add(GRU(units=32, input_shape=(None, input_data.shape[-1])))
-    model.add(Dense(units=1))
+    model.add(GRU(units=32,
+                  dropout=0.1,
+                  return_sequences=True,
+                  input_shape=(None, input_data.shape[-1])))
+    model.add(GRU(units=64,
+                  dropout=0.1))
 
+    model.add(Dense(units=1))
     model.compile(optimizer='rmsprop', loss='mae')
     history = model.fit(train_generate,
                         steps_per_epoch=500,
-                        epochs=20,
+                        epochs=40,
                         validation_data=val_generate,
                         validation_steps=val_steps)
-
-
 
 
 

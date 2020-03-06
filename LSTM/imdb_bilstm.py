@@ -1,21 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #------------------------------------------------------
-# @ File       : imdb_lstm.py
+# @ File       : imdb_bilstm.py
 # @ Description:  
 # @ Author     : Alex Chung
 # @ Contact    : yonganzhong@outlook.com
 # @ License    : Copyright (c) 2017-2018
-# @ Time       : 2020/3/5 下午2:38
+# @ Time       : 2020/3/6 下午3:23
 # @ Software   : PyCharm
 #-------------------------------------------------------
-
 
 import os
 from keras.datasets import imdb
 from keras.preprocessing import sequence
 from keras.models import Sequential
-from keras.layers import Embedding, Dense, LSTM
+from keras.layers import Embedding, Dense, LSTM, Bidirectional
 
 
 if __name__ == "__main__":
@@ -34,8 +33,8 @@ if __name__ == "__main__":
     # lstm network
     model = Sequential()
     model.add(Embedding(input_dim=max_feature, output_dim=output_dim, input_length=max_len))
-    model.add(LSTM(units=32, return_sequences=True))
-    model.add(LSTM(units=16))
+    model.add(Bidirectional(LSTM(units=32, return_sequences=True)))
+    model.add(Bidirectional(LSTM(units=16)))
     model.add(Dense(units=1, activation='sigmoid'))
     model.summary()
 
